@@ -28,7 +28,14 @@ model Prayer {
   badSpirit     String @db.VarChar(500) @map("bad_spirit")
   goodFam       String @db.VarChar(500) @map("good_fam")
   badFam        String @db.VarChar(500) @map("bad_fam")
+
+  rosary             Boolean  @default(false)
+  lectioDivina       Boolean  @default(false)
+  lectioDivinaNotes  String?
+  adoration          Boolean  @default(false)
+  adorationHours     Float?
+
   createdAt DateTime @default(now())
-  
+
   @@map("prayer")
 }
