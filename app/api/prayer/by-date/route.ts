@@ -1,26 +1,26 @@
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { NextResponse } from 'next/server';
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const date = searchParams.get('date'); // YYYY-MM-DD
+// GET /api/prayer/by-date?date=YYYY-MM-DD
+export async function GET(req: NextRequest) {
+  const url = new URL(req.url);
+  const date = url.searchParams.get('date');
 
-  if (!date) {
-    return NextResponse.json([], { status: 400 });
-  }
+  if (!date) return NextResponse.json({ message: 'Missing date' }, { status: 400 });
 
-  const start = new Date(`${date}T00:00:00`);
-  const end = new Date(`${date}T23:59:59`);
-
-  const prayers = await prisma.prayer.findMany({
-    where: {
-      createdAt: {
-        gte: start,
-        lte: end,
+  try {
+    const prayers = await prisma.prayer.findMany({
+      where: {
+        createdAt: {
+          gte: new Date(`${date}T00:00:00.000Z`),
+          lte: new Date(`${date}T23:59:59.999Z`),
+        },
       },
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+      orderBy: { createdAt: 'desc' },
+    });
 
-  return NextResponse.json(prayers);
+    return NextResponse.json(prayers);
+  } catch (err) {
+    return NextResponse.json({ message: 'Failed to fetch prayers' }, { status: 500 });
+  }
 }
